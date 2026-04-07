@@ -2,16 +2,19 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const cron = require('node-cron');
 require('dotenv').config();
 const express = require('express');
-
 const app = express();
 
-// 🌐 Servidor web para que Render no duerma
 app.get('/', (req, res) => {
-  res.send('Bot activo');
+  res.send(`
+    <h1>💀 MC Bot Activo</h1>
+    <p>Sons Of The Road MC</p>
+  `);
 });
 
-app.listen(3000, () => {
-  console.log('Servidor web activo');
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Servidor web activo en puerto ${PORT}`);
 });
 
 const client = new Client({
