@@ -1,7 +1,18 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const cron = require('node-cron');
 require('dotenv').config();
+const express = require('express');
 
+const app = express();
+
+// 🌐 Servidor web para que Render no duerma
+app.get('/', (req, res) => {
+  res.send('Bot activo');
+});
+
+app.listen(3000, () => {
+  console.log('Servidor web activo');
+});
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
@@ -9,25 +20,25 @@ const client = new Client({
 
 const TOKEN = process.env.TOKEN;
 
-const CHANNEL_NAME = 'actividades';
+// 🔥 PEGÁ ACÁ EL ID DEL CANAL
+const CHANNEL_ID = '1491131838700322846';
 
-client.once('ready', async () => {
+client.once('clientReady', async () => {
   console.log(`Conectado como ${client.user.tag}`);
-
-  const guilds = client.guilds.cache;
 
   let channel;
 
-  guilds.forEach(guild => {
-    const found = guild.channels.cache.find(c => c.name === CHANNEL_NAME);
-    if (found) channel = found;
-  });
+  try {
+    channel = await client.channels.fetch(CHANNEL_ID);
+  } catch (error) {
+    console.log('No pude encontrar el canal con ese ID');
+    return;
+  }
 
   if (!channel) {
-    console.log('No encontré el canal actividades');
+    console.log('Canal no encontrado');
     return;
-    }
-    
+  }
 
   const eventos = [
     {
@@ -102,17 +113,16 @@ client.once('ready', async () => {
 
       const minutoPrevio = 55;
       const horaPrevia = (hora - 1 + 24) % 24;
-
       const diasCron = evento.dias ? evento.dias.join(',') : '*';
 
-      // ⏳ AVISO 5 MIN ANTES
+      // ⏳ 5 minutos antes
       cron.schedule(`${minutoPrevio} ${horaPrevia} * * ${diasCron}`, () => {
         channel.send(`@everyone ⏳ **En 5 minutos comienza:** ${evento.nombre}`);
       }, {
         timezone: "America/Argentina/Buenos_Aires"
       });
 
-      // 🚨 INICIO
+      // 🚨 Inicio
       cron.schedule(`0 ${hora} * * ${diasCron}`, () => {
         channel.send(`@everyone 🚨 **ACTIVO:** ${evento.nombre}`);
       }, {
