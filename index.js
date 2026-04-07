@@ -28,9 +28,6 @@ client.once('ready', async () => {
     return;
     }
     
-    setTimeout(() => {
-  channel.send('@everyone 🔥 TEST funcionando');
-}, 5000);
 
   const eventos = [
     {
