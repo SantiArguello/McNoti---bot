@@ -193,36 +193,31 @@ function obtenerProximosEventos() {
   eventos.forEach(evento => {
     evento.horas.forEach(hora => {
 
-      let mejorFecha = null;
-
-      // 👇 probamos los próximos 7 días
       for (let i = 0; i < 7; i++) {
 
-        const fecha = new Date();
+        const fecha = new Date(ahora);
         fecha.setDate(ahora.getDate() + i);
         fecha.setHours(hora, 0, 0, 0);
 
         const diaSemana = fecha.getDay();
 
-        // 👇 si tiene restricción de días
+        // 👇 respetar días si tiene
         if (evento.dias && !evento.dias.includes(diaSemana)) {
           continue;
         }
 
-        // 👇 si es hoy y ya pasó → ignorar
-        if (i === 0 && fecha <= ahora) {
+        // 👇 si es hoy y ya pasó, seguimos
+        if (i === 0 && fecha.getTime() <= ahora.getTime()) {
           continue;
         }
 
-        mejorFecha = fecha;
-        break;
-      }
-
-      if (mejorFecha) {
+        // 👇 guardamos y cortamos
         eventosFuturos.push({
-          fecha: mejorFecha,
+          fecha,
           nombre: evento.nombre
         });
+
+        break;
       }
 
     });
