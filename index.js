@@ -193,12 +193,35 @@ function obtenerProximosEventos() {
   eventos.forEach(evento => {
     evento.horas.forEach(hora => {
 
-      const fecha = new Date();
+      let fecha = new Date();
       fecha.setHours(hora, 0, 0, 0);
 
-      // si ya pasó hoy → lo pasamos a mañana
-      if (fecha <= ahora) {
-        fecha.setDate(fecha.getDate() + 1);
+      // 👇 si tiene días específicos
+      if (evento.dias) {
+        let diasValidos = evento.dias;
+
+        let encontrado = false;
+
+        for (let i = 0; i < 7; i++) {
+          let diaCheck = (ahora.getDay() + i) % 7;
+
+          if (diasValidos.includes(diaCheck)) {
+            fecha.setDate(ahora.getDate() + i);
+
+            // si es hoy pero ya pasó la hora → seguimos buscando
+            if (i === 0 && fecha <= ahora) continue;
+
+            encontrado = true;
+            break;
+          }
+        }
+
+        if (!encontrado) return;
+      } else {
+        // 👇 eventos todos los días
+        if (fecha <= ahora) {
+          fecha.setDate(fecha.getDate() + 1);
+        }
       }
 
       eventosFuturos.push({
@@ -209,7 +232,6 @@ function obtenerProximosEventos() {
     });
   });
 
-  // ordenar por fecha real
   eventosFuturos.sort((a, b) => a.fecha - b.fecha);
 
   return eventosFuturos.slice(0, 10);
