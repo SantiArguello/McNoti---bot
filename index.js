@@ -186,34 +186,34 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
 
 // 🧠 PROXIMOS
 
-function obtenerProximosEventosPro() {
+function obtenerProximosEventos() {
   const ahora = new Date();
-
-  let lista = [];
+  const eventosFuturos = [];
 
   eventos.forEach(evento => {
     evento.horas.forEach(hora => {
 
-      const fechaEvento = new Date();
-      fechaEvento.setHours(hora, 0, 0, 0);
+      const fecha = new Date();
+      fecha.setHours(hora, 0, 0, 0);
 
-      if (fechaEvento < ahora) {
-        fechaEvento.setDate(fechaEvento.getDate() + 1);
+      // si ya pasó hoy → lo pasamos a mañana
+      if (fecha <= ahora) {
+        fecha.setDate(fecha.getDate() + 1);
       }
 
-      lista.push({
-        fecha: fechaEvento,
+      eventosFuturos.push({
+        fecha,
         nombre: evento.nombre
       });
 
     });
   });
 
-  lista.sort((a, b) => a.fecha - b.fecha);
+  // ordenar por fecha real
+  eventosFuturos.sort((a, b) => a.fecha - b.fecha);
 
-  return lista;
+  return eventosFuturos.slice(0, 10);
 }
-
 // 🤖 CLIENT
 
 const client = new Client({
@@ -283,35 +283,22 @@ client.on("interactionCreate", async interaction => {
 
   if (interaction.commandName === "proximos") {
 
-  const lista = obtenerProximosEventosPro();
+  const lista = obtenerProximosEventos();
 
   if (!lista.length) {
     return interaction.reply("No hay eventos próximos.");
   }
 
-  const siguiente = lista[0];
-
-  const hSig = siguiente.fecha.getHours().toString().padStart(2, "0");
-  const mSig = siguiente.fecha.getMinutes().toString().padStart(2, "0");
-
-  const resto = lista.slice(1, 6);
-
-  const textoResto = resto.map(e => {
+  const texto = lista.map(e => {
     const h = e.fecha.getHours().toString().padStart(2, "0");
     const m = e.fecha.getMinutes().toString().padStart(2, "0");
     return `${h}:${m} - ${e.nombre}`;
   }).join("\n");
 
   const embed = new EmbedBuilder()
-    .setColor("#FF0000")
-    .setTitle("🔥 Actividad en la ciudad")
-    .setDescription(`
-🔥 **SIGUIENTE EVENTO**
-${hSig}:${mSig} - ${siguiente.nombre}
-
-⏳ **LUEGO**
-${textoResto}
-`)
+    .setColor("#00FFAA")
+    .setTitle("⏳ Próximos eventos")
+    .setDescription(texto)
     .setFooter({ text: "Sons Of The Road MC" })
     .setTimestamp();
 
