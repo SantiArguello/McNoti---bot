@@ -186,23 +186,32 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
 
 // 🧠 PROXIMOS
 
-function obtenerProximosEventos() {
+function obtenerProximosEventosPro() {
   const ahora = new Date();
-  const horaActual = ahora.getHours();
 
-  let proximos = [];
+  let lista = [];
 
   eventos.forEach(evento => {
     evento.horas.forEach(hora => {
-      if (hora >= horaActual) {
-        proximos.push({ hora, nombre: evento.nombre });
+
+      const fechaEvento = new Date();
+      fechaEvento.setHours(hora, 0, 0, 0);
+
+      if (fechaEvento < ahora) {
+        fechaEvento.setDate(fechaEvento.getDate() + 1);
       }
+
+      lista.push({
+        fecha: fechaEvento,
+        nombre: evento.nombre
+      });
+
     });
   });
 
-  proximos.sort((a, b) => a.hora - b.hora);
+  lista.sort((a, b) => a.fecha - b.fecha);
 
-  return proximos.slice(0, 5);
+  return lista;
 }
 
 // 🤖 CLIENT
@@ -274,22 +283,40 @@ client.on("interactionCreate", async interaction => {
 
   if (interaction.commandName === "proximos") {
 
-    const lista = obtenerProximosEventos();
+  const lista = obtenerProximosEventosPro();
 
-    if (!lista.length) {
-      return interaction.reply("No hay eventos próximos.");
-    }
-
-    const texto = lista.map(e => `${e.hora}:00 - ${e.nombre}`).join("\n");
-
-    const embed = new EmbedBuilder()
-      .setColor("#00FFAA")
-      .setTitle("⏳ Próximos eventos")
-      .setDescription(texto)
-      .setFooter({ text: "Sons Of The Road MC" });
-
-    interaction.reply({ embeds: [embed] });
+  if (!lista.length) {
+    return interaction.reply("No hay eventos próximos.");
   }
+
+  const siguiente = lista[0];
+
+  const hSig = siguiente.fecha.getHours().toString().padStart(2, "0");
+  const mSig = siguiente.fecha.getMinutes().toString().padStart(2, "0");
+
+  const resto = lista.slice(1, 6);
+
+  const textoResto = resto.map(e => {
+    const h = e.fecha.getHours().toString().padStart(2, "0");
+    const m = e.fecha.getMinutes().toString().padStart(2, "0");
+    return `${h}:${m} - ${e.nombre}`;
+  }).join("\n");
+
+  const embed = new EmbedBuilder()
+    .setColor("#FF0000")
+    .setTitle("🔥 Actividad en la ciudad")
+    .setDescription(`
+🔥 **SIGUIENTE EVENTO**
+${hSig}:${mSig} - ${siguiente.nombre}
+
+⏳ **LUEGO**
+${textoResto}
+`)
+    .setFooter({ text: "Sons Of The Road MC" })
+    .setTimestamp();
+
+  interaction.reply({ embeds: [embed] });
+}
 });
 
 client.login(TOKEN);
