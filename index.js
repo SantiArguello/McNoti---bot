@@ -160,11 +160,7 @@ client.once("clientReady", async () => {
       dias: null,
       horas: [16, 19],
     },
-    {
-      nombre: "💸 Lavado de dinero",
-      dias: [3, 5, 6, 0],
-      horas: [18],
-    },
+   
     {
       nombre: "🔁 Tráfico múltiple",
       dias: [4, 0],
@@ -186,6 +182,21 @@ client.once("clientReady", async () => {
       dias: [1, 6, 0],
       horas: [16],
       multiAviso: true,
+    },
+    {
+      nombre: "🏪 Robo de almacén",
+      dias: null,
+      horas: [21, 9],
+    },
+    {
+      nombre: "🏬 Robo de negocio",
+      dias: null,
+      horas: [21, 9],
+    },
+    {
+      nombre: "💸 Mantenimiento de máquinas",
+      dias: null,
+      horas: [18],
     },
   ];
 
