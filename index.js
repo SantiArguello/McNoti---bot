@@ -120,6 +120,88 @@ function crearEmbed(eventoNombre, mensaje, tipoAviso) {
     .setTimestamp();
 }
 
+function getHoraFin(nombre, horaInicio) {
+
+  const fin = {
+
+    "💀 Tráfico ilegal": {
+      11: 12,
+      15: 16,
+      19: 20
+    },
+
+    "🚢 Tráfico naval": {
+      11: 12,
+      15: 16,
+      19: 20
+    },
+
+    "💀 Tráfico ilegal avanzado": {
+      13: 15,
+      18: 19
+    },
+
+    "🚢 Tráfico naval avanzado": {
+      13: 15,
+      18: 19
+    },
+
+    "🏍️ Robo de motocicleta": {
+      10: 12,
+      14: 15,
+      16: 17,
+      17: 18,
+      19: 20,
+      22: 23
+    },
+
+    "📦 Búsqueda de contenedores": {
+      6: 8,
+      12: 14,
+      18: 20,
+      23: 0
+    },
+
+    "🧪 Reparto de químicos": {
+      14: 15
+    },
+
+    "🚗 Arrasa con sus vehículos": {
+      16: 17,
+      19: 20
+    },
+
+    "🔁 Tráfico múltiple": {
+      18: 19
+    },
+
+    "🫀 Tráfico de órganos": {
+      18: 20
+    },
+
+    "🌊 Búsqueda acuática": {
+      16: 17
+    },
+
+    "💸 Mantenimiento de máquinas": {
+      18: 19
+    },
+
+    "🏪 Robo de almacén": {
+      9: 11,
+      21: 23
+    },
+
+    "🏬 Robo de negocio": {
+      9: 11,
+      21: 23
+    }
+
+  };
+
+  return fin[nombre]?.[horaInicio] ?? null;
+}
+
 // =======================
 // 📅 EVENTOS
 // =======================
@@ -200,29 +282,105 @@ client.once("clientReady", async () => {
   });
 
   // cron
-  eventos.forEach(evento => {
-    evento.horas.forEach(hora => {
+  // cron
+eventos.forEach(evento => {
+  evento.horas.forEach(hora => {
 
-      const diasCron = evento.dias ? evento.dias.join(",") : "*";
+    const diasCron = evento.dias ? evento.dias.join(",") : "*";
 
-      cron.schedule(`0 ${hora} * * ${diasCron}`, () => {
+    // 🔥 AVISOS PREVIOS
+    if (evento.multiAviso) {
 
-        let mensaje;
+      [15, 10, 5].forEach(min => {
+        const total = hora * 60 - min;
+        const h = Math.floor((total + 1440) % 1440 / 60);
+        const m = (total + 1440) % 60;
 
-        if (evento.tipo === "ventana") {
-          mensaje = "Los objetivos están disponibles en la ciudad.\nAprovechen mientras dure.";
-        } else {
-          mensaje = getMensajeEvento(evento.nombre, "activo");
-        }
+        cron.schedule(`${m} ${h} * * ${diasCron}`, () => {
+          const msg = getMensajeEvento(evento.nombre, min);
 
-        const embed = crearEmbed(evento.nombre, `${mensaje}\n\nYA DISPONIBLE.`, "activo");
+          const embed = crearEmbed(
+            evento.nombre,
+            `${msg}\n\nComienza en ${min} minutos.`,
+            min
+          );
 
-        channel.send({ content: "@everyone", embeds: [embed] });
+          channel.send({
+            content: "@everyone",
+            embeds: [embed]
+          });
 
-      }, { timezone: "America/Argentina/Buenos_Aires" });
+        }, {
+          timezone: "America/Argentina/Buenos_Aires"
+        });
+      });
 
+    } else {
+      // ⏳ SOLO 5 MIN PARA EVENTOS NORMALES
+      const hPrev = (hora - 1 + 24) % 24;
+
+      cron.schedule(`55 ${hPrev} * * ${diasCron}`, () => {
+        const msg = getMensajeEvento(evento.nombre, 5);
+
+        const embed = crearEmbed(
+          evento.nombre,
+          `${msg}\n\nComienza en 5 minutos.`,
+          5
+        );
+
+        channel.send({
+          content: "@everyone",
+          embeds: [embed]
+        });
+
+      }, {
+        timezone: "America/Argentina/Buenos_Aires"
+      });
+    }
+
+    // 🚨 INICIO (LO QUE YA TENÍAS)
+    cron.schedule(`0 ${hora} * * ${diasCron}`, () => {
+
+      let mensaje;
+
+      if (evento.tipo === "ventana") {
+        mensaje = "Los objetivos están disponibles en la ciudad.\nAprovechen mientras dure.";
+      } else {
+        mensaje = getMensajeEvento(evento.nombre, "activo");
+      }
+
+      const horaFin = getHoraFin(evento.nombre, hora);
+
+let textoFinal = `${mensaje}\n\nYA DISPONIBLE.`;
+
+if (horaFin !== null) {
+  const ahora = new Date();
+  const fechaFin = new Date(ahora);
+
+  fechaFin.setHours(horaFin, 0, 0, 0);
+
+  if (fechaFin <= ahora) {
+    fechaFin.setDate(fechaFin.getDate() + 1);
+  }
+
+  const timestamp = Math.floor(fechaFin.getTime() / 1000);
+
+  textoFinal += `\n🕒 Finaliza <t:${timestamp}:F> (<t:${timestamp}:R>)`;
+}
+
+const embed = crearEmbed(evento.nombre, textoFinal, "activo");
+
+      channel.send({
+        content: "@everyone",
+        embeds: [embed]
+      });
+
+    }, {
+      timezone: "America/Argentina/Buenos_Aires"
     });
+
   });
+});
 
 });
 
