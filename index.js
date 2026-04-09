@@ -422,11 +422,13 @@ client.on("interactionCreate", async interaction => {
 
     lista.sort((a, b) => a.fecha - b.fecha);
 
-    const texto = lista.slice(0,10).map(e => {
-      const h = e.fecha.getHours().toString().padStart(2,"0");
-      const m = e.fecha.getMinutes().toString().padStart(2,"0");
-      return `${h}:${m} - ${e.nombre}`;
-    }).join("\n");
+   const texto = lista.slice(0,10).map(e => {
+
+  const timestamp = Math.floor(e.fecha.getTime() / 1000);
+
+  return `🕒 <t:${timestamp}:t> (<t:${timestamp}:R>) - ${e.nombre}`;
+
+}).join("\n");
 
     const embed = new EmbedBuilder()
       .setColor("#00FFAA")
