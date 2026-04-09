@@ -150,11 +150,28 @@ const commands = [
   new SlashCommandBuilder().setName("proximos").setDescription("Ver próximos eventos"),
   new SlashCommandBuilder().setName("help").setDescription("Ver comandos del bot"),
   new SlashCommandBuilder().setName("newsecuestro").setDescription("Crear secuestrado"),
-  new SlashCommandBuilder().setName("revisado").setDescription("Poner en enfriamiento")
-    .addStringOption(opt => opt.setName("id").setRequired(true)),
-  new SlashCommandBuilder().setName("muerto").setDescription("Eliminar secuestrado")
-    .addStringOption(opt => opt.setName("id").setRequired(true)),
-  new SlashCommandBuilder().setName("secuestrados").setDescription("Ver estado")
+
+  new SlashCommandBuilder()
+    .setName("revisado")
+    .setDescription("Poner en enfriamiento")
+    .addStringOption(opt =>
+      opt.setName("id")
+        .setDescription("ID del secuestrado")
+        .setRequired(true)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("muerto")
+    .setDescription("Eliminar secuestrado")
+    .addStringOption(opt =>
+      opt.setName("id")
+        .setDescription("ID del secuestrado")
+        .setRequired(true)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("secuestrados")
+    .setDescription("Ver estado")
 ].map(c => c.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
