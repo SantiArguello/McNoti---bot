@@ -356,7 +356,9 @@ eventos.forEach(evento => {
 let textoFinal = `${mensaje}\n\nYA DISPONIBLE.`;
 
 if (horaFin !== null) {
-  const ahora = new Date();
+  const ahora = new Date(
+  new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" })
+);
   const fechaFin = new Date(ahora);
 
   fechaFin.setHours(horaFin, 0, 0, 0);
@@ -402,7 +404,9 @@ client.on("interactionCreate", async interaction => {
 
   if (interaction.commandName === "proximos") {
 
-    const ahora = new Date();
+    const ahora = new Date(
+  new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" })
+);
     const lista = [];
 
     eventos.forEach(evento => {
