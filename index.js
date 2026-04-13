@@ -1,6 +1,8 @@
+require("dotenv").config();
+process.env.TZ = "America/Argentina/Buenos_Aires";
+
 const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, REST, Routes } = require("discord.js");
 const cron = require("node-cron");
-require("dotenv").config();
 const express = require("express");
 const fs = require("fs");
 const app = express();
