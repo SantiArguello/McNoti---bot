@@ -45,7 +45,7 @@ async function programarSecuestrado(client, sec) {
   setTimeout(async () => {
     const canal = await client.channels.fetch(CHANNEL_ID);
 
-    canal.send(`@everyone 🔒 Secuestrado #${sec.id} disponible nuevamente.`);
+    canal.send(`🔒 Secuestrado #${sec.id} disponible nuevamente.`);
 
     const data = cargarData();
     const s = data.secuestrados.find(x => x.id === sec.id);
@@ -308,7 +308,6 @@ eventos.forEach(evento => {
           );
 
           channel.send({
-            content: "@everyone",
             embeds: [embed]
           });
 
@@ -331,7 +330,6 @@ eventos.forEach(evento => {
         );
 
         channel.send({
-          content: "@everyone",
           embeds: [embed]
         });
 
@@ -375,7 +373,6 @@ if (horaFin !== null) {
 const embed = crearEmbed(evento.nombre, textoFinal, "activo");
 
       channel.send({
-        content: "@everyone",
         embeds: [embed]
       });
 
